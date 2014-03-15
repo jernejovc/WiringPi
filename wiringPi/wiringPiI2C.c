@@ -222,6 +222,8 @@ int wiringPiI2CSetup (const int devId)
   const char *device ;
 
   rev = piBoardRev () ;
+  if (rev == -1)
+    return -1;
 
   if (rev == 1)
     device = "/dev/i2c-0" ;

@@ -570,7 +570,6 @@ static void piBoardRevOops (const char *why)
   fprintf (stderr, " -> %s\n", why) ;
   fprintf (stderr, " ->  You may want to check:\n") ;
   fprintf (stderr, " ->  http://www.raspberrypi.org/phpBB3/viewtopic.php?p=184410#p184410\n") ;
-  exit (EXIT_FAILURE) ;
 }
 
 int piBoardRev (void)
@@ -583,8 +582,10 @@ int piBoardRev (void)
   if (boardRev != -1)	// No point checking twice
     return boardRev ;
 
-  if ((cpuFd = fopen ("/proc/cpuinfo", "r")) == NULL)
+  if ((cpuFd = fopen ("/proc/cpuinfo", "r")) == NULL) {
     piBoardRevOops ("Unable to open /proc/cpuinfo") ;
+    return -1;
+  }
 
   while (fgets (line, 120, cpuFd) != NULL)
     if (strncmp (line, "Revision", 8) == 0)
@@ -592,8 +593,10 @@ int piBoardRev (void)
 
   fclose (cpuFd) ;
 
-  if (strncmp (line, "Revision", 8) != 0)
+  if (strncmp (line, "Revision", 8) != 0) {
     piBoardRevOops ("No \"Revision\" line") ;
+    return -1;
+  }
 
   for (c = &line [strlen (line) - 1] ; (*c == '\n') || (*c == '\r') ; --c)
     *c = 0 ;
@@ -605,8 +608,10 @@ int piBoardRev (void)
     if (isdigit (*c))
       break ;
 
-  if (!isdigit (*c))
+  if (!isdigit (*c)) {
     piBoardRevOops ("No numeric revision string") ;
+    return -1;
+  }
 
 // If you have overvolted the Pi, then it appears that the revision
 //	has 100000 added to it!
